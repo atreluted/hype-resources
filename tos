@@ -1,0 +1,172 @@
+Hype Terms of Service
+Effective Date: August 28, 2026
+
+Welcome to Hype. These Terms of Service ("Terms") govern your access to and use of the Hype software, applications, services, documentation, and related materials (collectively, the "Service").
+
+By downloading, installing, accessing, or using Hype, you acknowledge that you have read, understood, and agree to be bound by these Terms. If you do not agree to these Terms, you may not install or use Hype.
+
+1. Description of Hype
+Hype is a software development and debugging tool designed to assist developers in testing and debugging their own Roblox experiences.
+
+Hype may provide functionality that allows authorized developers to execute Luau code within a controlled debugging environment associated with a Roblox experience. Such functionality is intended solely for legitimate development, debugging, testing, and security purposes on experiences that you own or are expressly authorized to test.
+
+Hype is not intended to facilitate unauthorized access, exploitation, cheating, disruption, or interference with Roblox experiences or services.
+
+2. Eligibility and Authorization
+You may use Hype only for lawful purposes and only in connection with Roblox experiences, software, systems, or environments that you own or have explicit authorization to test.
+
+You are solely responsible for ensuring that your use of Hype complies with:
+
+These Terms;
+Applicable laws and regulations;
+The rights of third parties; and
+Any applicable terms, rules, or policies governing platforms or services that you use Hype with.
+You must not use Hype to access, modify, interfere with, or test an experience that you do not own or have permission to test.
+
+3. Acceptable Use
+You agree to use Hype exclusively for legitimate development, debugging, testing, research, and related purposes.
+
+You may use Hype to:
+
+Debug your own Roblox experiences;
+Test Luau code and game functionality;
+Identify and diagnose bugs;
+Test systems and mechanics within experiences you are authorized to test;
+Conduct authorized security testing; and
+Perform other legitimate development activities.
+4. Prohibited Uses
+You may not use Hype to:
+
+Gain unauthorized access to another person's Roblox experience, account, computer, server, or data;
+Exploit or disrupt Roblox experiences that you do not own or have permission to test;
+Cheat, automate gameplay, or obtain an unfair advantage in experiences where you are not authorized to do so;
+Steal, extract, copy, or redistribute another developer's code, assets, data, or intellectual property;
+Circumvent authentication, licensing, access controls, security mechanisms, or technical restrictions for an unauthorized purpose;
+Deploy malicious code, malware, ransomware, spyware, or other harmful software through Hype;
+Interfere with the operation, availability, or integrity of Roblox, Hype, or any third-party service;
+Use Hype to attack, overload, or intentionally degrade any system or service;
+Use Hype to obtain information or data that you are not authorized to access; or
+Use Hype for any unlawful purpose.
+5. Reverse Engineering and Modification
+Except where expressly permitted by applicable law, you may not:
+
+Reverse engineer Hype;
+Decompile Hype;
+Disassemble Hype;
+Attempt to derive or reconstruct Hype's source code;
+Analyze Hype for the purpose of reproducing or substantially replicating its functionality;
+Modify, adapt, translate, or create derivative works of Hype;
+Circumvent technical protections implemented by Hype;
+Remove or alter copyright, licensing, attribution, or proprietary notices;
+Extract proprietary algorithms, implementation details, or other non-public components of Hype; or
+Develop or distribute software designed to circumvent Hype's licensing, authentication, or technical protections.
+Nothing in these Terms is intended to prohibit activity that cannot lawfully be restricted under applicable law.
+
+6. Redistribution
+Unless Hype expressly authorizes you in writing, you may not:
+
+Redistribute Hype;
+Sell, rent, lease, sublicense, or otherwise transfer Hype;
+Upload Hype or its components to unauthorized third-party repositories or file-sharing services;
+Distribute modified or repackaged versions of Hype;
+Remove Hype's licensing or attribution information; or
+Provide Hype to another person for the purpose of circumventing licensing or access restrictions.
+7. Intellectual Property
+Hype, including its software, source code, object code, user interface, design, documentation, graphics, logos, and other materials, is owned by or licensed to the Hype developers and is protected by applicable intellectual property laws.
+
+These Terms grant you a limited, non-exclusive, non-transferable, revocable license to use Hype in accordance with these Terms.
+
+No ownership rights are transferred to you.
+
+You retain ownership of the original content and code that you create and use with Hype, subject to any rights belonging to third parties.
+
+8. Your Content and Code
+Hype may interact with code, projects, experiences, or other content supplied by you.
+
+You are responsible for ensuring that you have the necessary rights and permissions to use such content with Hype.
+
+You retain responsibility for your code and for any actions performed using Hype.
+
+Hype does not claim ownership of your original Roblox experience, Luau code, assets, or other content solely because you use that content with Hype.
+
+9. Security and Responsible Use
+Hype is designed to provide a controlled environment for authorized debugging and testing.
+
+However, no software can guarantee that every execution, script, or interaction will be completely risk-free.
+
+You are responsible for maintaining appropriate backups and testing your experiences in environments appropriate for development and debugging.
+
+You should not use Hype with systems or content where you lack authorization.
+
+If you discover a security vulnerability in Hype, you are encouraged to report it to the Hype developers rather than publicly distributing exploit code or using the vulnerability to cause harm.
+
+10. Third-Party Services
+Hype may interact with or operate alongside third-party software, platforms, APIs, or services, including Roblox.
+
+Hype is not responsible for the policies, availability, functionality, or actions of third-party services.
+
+Your use of third-party services remains subject to their respective terms and policies.
+
+11. Updates
+Hype may be updated, modified, or discontinued at any time.
+
+Updates may include bug fixes, security improvements, new functionality, changes to existing functionality, or removal of functionality.
+
+You understand that certain versions of Hype may cease to function if they become incompatible with third-party software or services.
+
+12. Termination
+We may suspend or terminate your license to use Hype if you materially violate these Terms, misuse Hype, attempt to circumvent its licensing or security mechanisms, or use Hype for unlawful or unauthorized purposes.
+
+Upon termination, you must stop using Hype and delete copies of the software that you are not otherwise legally entitled to retain.
+
+Sections that by their nature should survive termination, including intellectual property, limitations of liability, indemnification, and applicable restrictions, will survive termination.
+
+13. Disclaimer of Warranties
+Hype is provided on an "AS IS" and "AS AVAILABLE" basis, to the maximum extent permitted by applicable law.
+
+We make no warranties that Hype will:
+
+Be completely error-free;
+Operate without interruption;
+Be compatible with every version of Roblox or other software;
+Detect every bug or vulnerability;
+Prevent every possible issue caused by executed code; or
+Meet every particular development requirement.
+You use Hype at your own risk.
+
+14. Limitation of Liability
+To the maximum extent permitted by applicable law, Hype and its developers will not be liable for indirect, incidental, special, consequential, exemplary, or punitive damages arising from or relating to your use of Hype.
+
+This includes, without limitation, loss of data, loss of profits, loss of business, loss of game progress, service interruption, or damage resulting from code executed through Hype.
+
+Nothing in these Terms excludes or limits liability that cannot legally be excluded or limited under applicable law.
+
+15. Indemnification
+To the maximum extent permitted by applicable law, you agree to defend, indemnify, and hold harmless Hype and its developers from claims, damages, liabilities, losses, and expenses arising from your:
+
+Misuse of Hype;
+Violation of these Terms;
+Violation of applicable law;
+Unauthorized testing or access; or
+Infringement of another person's rights.
+16. Changes to These Terms
+We may modify these Terms from time to time.
+
+If material changes are made, we may provide notice through Hype, our website, or another reasonable method.
+
+Your continued use of Hype after updated Terms become effective constitutes acceptance of the revised Terms, to the extent permitted by applicable law.
+
+17. Governing Law
+These Terms will be governed by the laws of the jurisdiction in which the Hype developer or operating entity is legally established, without regard to conflict-of-law principles, unless applicable law requires otherwise.
+
+Any disputes will be handled in the courts having appropriate jurisdiction, subject to applicable law.
+
+18. Entire Agreement
+These Terms constitute the agreement between you and Hype regarding your use of the Service and supersede prior agreements concerning the same subject matter, except where a separate written agreement expressly applies.
+
+If any provision of these Terms is determined to be unenforceable, the remaining provisions will remain in effect to the fullest extent permitted by law.
+
+19. Contact
+If you have questions about these Terms, licensing, authorized use, or security issues involving Hype, contact the Hype development team through the official discord server provided with the software.
+
+By installing or using Hype, you acknowledge that you have read and agree to these Terms of Service.
