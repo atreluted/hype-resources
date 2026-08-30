@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Hype Editor</title>
+
+    <style>
+        html,
+        body,
+        #editor {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #0D0614;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.2/min/vs/loader.min.js"></script>
+</head>
+
+<body>
+
+<div id="editor"></div>
+
+<script>
+
+    require.config({
+        paths: {
+            vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.2/min/vs"
+        }
+    });
+
+    require(["vs/editor/editor.main"], function () {
+
+        monaco.languages.register({
+            id: "luau"
+        });
+
+        monaco.languages.setMonarchTokensProvider("luau", {
+
+            keywords: [
+                "and",
+                "break",
+                "continue",
+                "do",
+                "else",
+                "elseif",
+                "end",
+                "export",
+                "false",
+                "for",
+                "function",
+                "if",
+                "in",
+                "local",
+                "nil",
+                "not",
+                "or",
+                "repeat",
+                "return",
+                "then",
+                "true",
+                "type",
+                "until",
+                "while"
+            ],
+
+            typeKeywords: [
+                "any",
+                "boolean",
+                "buffer",
+                "number",
+                "string",
+                "table",
+                "thread",
+                "userdata",
+                "function"
+            ],
+
+            operators: [
+                "+",
+                "-",
+                "*",
+                "/",
+                "%",
+                "^",
+                "#",
+                "==",
+                "~=",
+                "<=",
+                ">=",
+                "<",
+                ">",
+                "=",
+                "..",
+                "..."
+            ],
+
+            symbols: /[=><!~?:&|+\-*\/\^%]+/,
+
+            tokenizer: {
+
+                root: [
+
+                    [
+                        /[a-zA-Z_][a-zA-Z0-9_]*/,
+                        {
+                            cases: {
+                                "@keywords": "keyword",
+                                "@typeKeywords": "type",
+                                "@default": "identifier"
+                            }
+                        }
+                    ],
+
+                    [
+                        /0[xX][0-9a-fA-F]+/,
+                        "number.hex"
+                    ],
+
+                    [
+                        /\d+(\.\d+)?/,
+                        "number"
+                    ],
+
+                    [
+                        /"(?:[^"\\]|\\.)*"/,
+                        "string"
+                    ],
+
+                    [
+                        /'(?:[^'\\]|\\.)*'/,
+                        "string"
+                    ],
+
+                    [
+                        /--.*$/,
+                        "comment"
+                    ],
+
+                    [
+                        /[{}()\[\]]/,
+                        "@brackets"
+                    ],
+
+                    [
+                        /[;,.]/,
+                        "delimiter"
+                    ],
+
+                    [
+                        /@symbols/,
+                        {
+                            cases: {
+                                "@operators": "operator",
+                                "@default": ""
+                            }
+                        }
+                    ]
+                ]
+            }
+        });
+
+        monaco.languages.setLanguageConfiguration("luau", {
+
+            comments: {
+                lineComment: "--",
+                blockComment: [
+                    "--[[",
+                    "]]"
+                ]
+            },
+
+            brackets: [
+                ["{", "}"],
+                ["[", "]"],
+                ["(", ")"]
+            ],
+
+            autoClosingPairs: [
+                {
+                    open: "(",
+                    close: ")"
+                },
+                {
+                    open: "[",
+                    close: "]"
+                },
+                {
+                    open: "{",
+                    close: "}"
+                },
+                {
+                    open: "\"",
+                    close: "\""
+                },
+                {
+                    open: "'",
+                    close: "'"
+                }
+            ]
+        });
+
+        const FunctionKind =
+            monaco.languages.CompletionItemKind.Function;
+
+        const VariableKind =
+            monaco.languages.CompletionItemKind.Variable;
+
+        const KeywordKind =
+            monaco.languages.CompletionItemKind.Keyword;
+
+        const ClassKind =
+            monaco.languages.CompletionItemKind.Class;
+
+        const ModuleKind =
+            monaco.languages.CompletionItemKind.Module;
+
+        function FunctionCompletion(
+            label,
+            insertText,
+            documentation
+        ) {
+            return {
+                label: label,
+                kind: FunctionKind,
+                insertText: insertText,
+                insertTextRules:
+                    monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                documentation: documentation || ""
+            };
+        }
+
+        function VariableCompletion(
+            label,
+            documentation
+        ) {
+            return {
+                label: label,
+                kind: VariableKind,
+                insertText: label,
+                documentation: documentation || ""
+            };
+        }
+
+        function KeywordCompletion(
+            label,
+            insertText
+        ) {
+            return {
+                label: label,
+                kind: KeywordKind,
+                insertText: insertText || label,
+                insertTextRules:
+                    monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+            };
+        }
+
+        function ClassCompletion(label) {
+            return {
+                label: label,
+                kind: ClassKind,
+                insertText: label
+            };
+        }
+
+        const completions = [
+
+            FunctionCompletion(
+                "print",
+                "print(\"Hello World\")",
+                "Prints values."
+            ),
+
+            FunctionCompletion(
+                "warn",
+                "warn(\"Hello World\")",
+                "Prints a warning."
+            ),
+
+            FunctionCompletion(
+                "error",
+                "error(\"Hello World\")",
+                "Raises an error."
+            ),
+
+            FunctionCompletion(
+                "assert",
+                "assert(${1:condition}, \"${2:message}\")",
+                "Raises an error if the condition is false."
+            ),
+
+            FunctionCompletion(
+                "pcall",
+                "pcall(${1:function})"
+            ),
+
+            FunctionCompletion(
+                "xpcall",
+                "xpcall(${1:function}, ${2:handler})"
+            ),
+
+            FunctionCompletion(
+                "loadstring",
+                "loadstring(${1:string})"
+            ),
+
+            FunctionCompletion(
+                "require",
+                "require(${1:module})",
+                "Loads a module."
+            ),
+
+            FunctionCompletion(
+                "select",
+                "select(${1:index}, ${2:...})"
+            ),
+
+            FunctionCompletion(
+                "tonumber",
+                "tonumber(${1:value})"
+            ),
+
+            FunctionCompletion(
+                "tostring",
+                "tostring(${1:value})"
+            ),
+
+            FunctionCompletion(
+                "type",
+                "type(${1:value})"
+            ),
+
+            FunctionCompletion(
+                "typeof",
+                "typeof(${1:value})"
+            ),
+
+            FunctionCompletion(
+                "pairs",
+                "pairs(${1:table})"
+            ),
+
+            FunctionCompletion(
+                "ipairs",
+                "ipairs(${1:table})"
+            ),
+
+            FunctionCompletion(
+                "next",
+                "next(${1:table}, ${2:key})"
+            ),
+
+            FunctionCompletion(
+                "rawget",
+                "rawget(${1:table}, ${2:key})"
+            ),
+
+            FunctionCompletion(
+                "rawset",
+                "rawset(${1:table}, ${2:key}, ${3:value})"
+            ),
+
+            FunctionCompletion(
+                "rawequal",
+                "rawequal(${1:a}, ${2:b})"
+            ),
+
+            FunctionCompletion(
+                "rawlen",
+                "rawlen(${1:value})"
+            ),
+
+            FunctionCompletion(
+                "setmetatable",
+                "setmetatable(${1:table}, ${2:metatable})"
+            ),
+
+            FunctionCompletion(
+                "getmetatable",
+                "getmetatable(${1:value})"
+            ),
+
+            FunctionCompletion(
+                "collectgarbage",
+                "collectgarbage(${1:\"count\"})"
+            ),
+
+            FunctionCompletion(
+                "dofile",
+                "dofile(${1:file})"
+            ),
+
+            FunctionCompletion(
+                "getfenv",
+                "getfenv(${1:function})"
+            ),
+
+            FunctionCompletion(
+                "table.insert",
+                "table.insert(${1:table}, ${2:value})"
+            ),
+
+            FunctionCompletion(
+                "table.remove",
+                "table.remove(${1:table}, ${2:index})"
+            ),
+
+            FunctionCompletion(
+                "table.concat",
+                "table.concat(${1:table}, ${2:\", \"})"
+            ),
+
+            FunctionCompletion(
+                "table.sort",
+                "table.sort(${1:table}, ${2:comparison})"
+            ),
+
+            FunctionCompletion(
+                "table.find",
+                "table.find(${1:table}, ${2:value})"
+            ),
+
+            FunctionCompletion(
+                "table.create",
+                "table.create(${1:count}, ${2:value})"
+            ),
+
+            FunctionCompletion(
+                "table.clone",
+                "table.clone(${1:table})"
+            ),
+
+            FunctionCompletion(
+                "table.clear",
+                "table.clear(${1:table})"
+            ),
+
+            FunctionCompletion(
+                "table.freeze",
+                "table.freeze(${1:table})"
+            ),
+
+            FunctionCompletion(
+                "table.move",
+                "table.move(${1:table}, ${2:first}, ${3:last}, ${4:target})"
+            ),
+
+            FunctionCompletion(
+                "string.byte",
+                "string.byte(${1:string}, ${2:index})"
+            ),
+
+            FunctionCompletion(
+                "string.char",
+                "string.char(${1:...})"
+            ),
+
+            FunctionCompletion(
+                "string.find",
+                "string.find(${1:string}, ${2:pattern})"
+            ),
+
+            FunctionCompletion(
+                "string.format",
+                "string.format(\"${1:%s}\", ${2:value})"
+            ),
+
+            FunctionCompletion(
+                "string.gmatch",
+                "string.gmatch(${1:string}, ${2:pattern})"
+            ),
+
+            FunctionCompletion(
+                "string.gsub",
+                "string.gsub(${1:string}, ${2:pattern}, ${3:replacement})"
+            ),
+
+            FunctionCompletion(
+                "string.len",
+                "string.len(${1:string})"
+            ),
+
+            FunctionCompletion(
+                "string.lower",
+                "string.lower(${1:string})"
+            ),
+
+            FunctionCompletion(
+                "string.match",
+                "string.match(${1:string}, ${2:pattern})"
+            ),
+
+            FunctionCompletion(
+                "string.rep",
+                "string.rep(${1:string}, ${2:count})"
+            ),
+
+            FunctionCompletion(
+                "string.reverse",
+                "string.reverse(${1:string})"
+            ),
+
+            FunctionCompletion(
+                "string.sub",
+                "string.sub(${1:string}, ${2:start}, ${3:end})"
+            ),
+
+            FunctionCompletion(
+                "string.upper",
+                "string.upper(${1:string})"
+            ),
+
+            FunctionCompletion(
+                "string.split",
+                "string.split(${1:string}, ${2:separator})"
+            ),
+
+            FunctionCompletion(
+                "math.abs",
+                "math.abs(${1:number})"
+            ),
+
+            FunctionCompletion(
+                "math.ceil",
+                "math.ceil(${1:number})"
+            ),
+
+            FunctionCompletion(
+                "math.floor",
+                "math.floor(${1:number})"
+            ),
+
+            FunctionCompletion(
+                "math.max",
+                "math.max(${1:...})"
+            ),
+
+            FunctionCompletion(
+                "math.min",
+                "math.min(${1:...})"
+            ),
+
+            FunctionCompletion(
+                "math.random",
+                "math.random(${1:min}, ${2:max})"
+            ),
+
+            FunctionCompletion(
+                "math.randomseed",
+                "math.randomseed(${1:seed})"
+            ),
+
+            FunctionCompletion(
+                "math.sqrt",
+                "math.sqrt(${1:number})"
+            ),
+
+            FunctionCompletion(
+                "math.sin",
+                "math.sin(${1:number})"
+            ),
+
+            FunctionCompletion(
+                "math.cos",
+                "math.cos(${1:number})"
+            ),
+
+            FunctionCompletion(
+                "math.tan",
+                "math.tan(${1:number})"
+            ),
+
+            FunctionCompletion(
+                "math.rad",
+                "math.rad(${1:degrees})"
+            ),
+
+            FunctionCompletion(
+                "math.deg",
+                "math.deg(${1:radians})"
+            ),
+
+            FunctionCompletion(
+                "task.wait",
+                "task.wait(${1:seconds})"
+            ),
+
+            FunctionCompletion(
+                "task.spawn",
+                "task.spawn(function()\n\t${1}\nend)"
+            ),
+
+            FunctionCompletion(
+                "task.defer",
+                "task.defer(function()\n\t${1}\nend)"
+            ),
+
+            FunctionCompletion(
+                "task.delay",
+                "task.delay(${1:seconds}, function()\n\t${2}\nend)"
+            ),
+
+            FunctionCompletion(
+                "task.cancel",
+                "task.cancel(${1:thread})"
+            ),
+
+            FunctionCompletion(
+                "coroutine.create",
+                "coroutine.create(function()\n\t${1}\nend)"
+            ),
+
+            FunctionCompletion(
+                "coroutine.resume",
+                "coroutine.resume(${1:thread}, ${2:...})"
+            ),
+
+            FunctionCompletion(
+                "coroutine.wrap",
+                "coroutine.wrap(function()\n\t${1}\nend)"
+            ),
+
+            FunctionCompletion(
+                "coroutine.yield",
+                "coroutine.yield(${1:...})"
+            ),
+
+            KeywordCompletion(
+                "function",
+                "function ${1:name}(${2})\n\t${3}\nend"
+            ),
+
+            KeywordCompletion(
+                "local function",
+                "local function ${1:name}(${2})\n\t${3}\nend"
+            ),
+
+            KeywordCompletion(
+                "if",
+                "if ${1:condition} then\n\t${2}\nend"
+            ),
+
+            KeywordCompletion(
+                "for",
+                "for ${1:i} = ${2:1}, ${3:100} do\n\t${4}\nend"
+            ),
+
+            KeywordCompletion(
+                "for pairs",
+                "for ${1:key}, ${2:value} in pairs(${3:table}) do\n\t${4}\nend"
+            ),
+
+            KeywordCompletion(
+                "for ipairs",
+                "for ${1:index}, ${2:value} in ipairs(${3:table}) do\n\t${4}\nend"
+            ),
+
+            KeywordCompletion(
+                "while",
+                "while ${1:condition} do\n\t${2}\nend"
+            ),
+
+            KeywordCompletion(
+                "repeat",
+                "repeat\n\t${1}\nuntil ${2:condition}"
+            ),
+
+            KeywordCompletion(
+                "do",
+                "do\n\t${1}\nend"
+            ),
+
+            KeywordCompletion(
+                "return",
+                "return ${1}"
+            ),
+
+            KeywordCompletion(
+                "local",
+                "local ${1:name} = ${2:value}"
+            ),
+
+            VariableCompletion(
+                "game",
+                "Roblox DataModel."
+            ),
+
+            VariableCompletion(
+                "workspace",
+                "Roblox Workspace."
+            ),
+
+            VariableCompletion(
+                "script",
+                "Current script."
+            ),
+
+            VariableCompletion(
+                "shared"
+            ),
+
+            VariableCompletion(
+                "_G"
+            ),
+
+            VariableCompletion(
+                "_VERSION"
+            ),
+
+            VariableCompletion(
+                "task"
+            ),
+
+            VariableCompletion(
+                "coroutine"
+            ),
+
+            VariableCompletion(
+                "table"
+            ),
+
+            VariableCompletion(
+                "string"
+            ),
+
+            VariableCompletion(
+                "math"
+            ),
+
+            VariableCompletion(
+                "os"
+            ),
+
+            VariableCompletion(
+                "debug"
+            ),
+
+            ClassCompletion("Instance"),
+            ClassCompletion("Vector2"),
+            ClassCompletion("Vector3"),
+            ClassCompletion("Vector2int16"),
+            ClassCompletion("Vector3int16"),
+            ClassCompletion("CFrame"),
+            ClassCompletion("Color3"),
+            ClassCompletion("UDim"),
+            ClassCompletion("UDim2"),
+            ClassCompletion("Ray"),
+            ClassCompletion("RaycastParams"),
+            ClassCompletion("Region3"),
+            ClassCompletion("BrickColor"),
+            ClassCompletion("Enum"),
+            ClassCompletion("TweenInfo"),
+            ClassCompletion("NumberRange"),
+            ClassCompletion("NumberSequence"),
+            ClassCompletion("ColorSequence"),
+            ClassCompletion("PhysicalProperties"),
+
+            FunctionCompletion(
+                "Instance.new",
+                "Instance.new(\"${1:Part}\")"
+            ),
+
+            FunctionCompletion(
+                "Vector2.new",
+                "Vector2.new(${1:x}, ${2:y})"
+            ),
+
+            FunctionCompletion(
+                "Vector3.new",
+                "Vector3.new(${1:x}, ${2:y}, ${3:z})"
+            ),
+
+            FunctionCompletion(
+                "CFrame.new",
+                "CFrame.new(${1:x}, ${2:y}, ${3:z})"
+            ),
+
+            FunctionCompletion(
+                "Color3.new",
+                "Color3.new(${1:r}, ${2:g}, ${3:b})"
+            ),
+
+            FunctionCompletion(
+                "Color3.fromRGB",
+                "Color3.fromRGB(${1:r}, ${2:g}, ${3:b})"
+            ),
+
+            FunctionCompletion(
+                "UDim2.new",
+                "UDim2.new(${1:xScale}, ${2:xOffset}, ${3:yScale}, ${4:yOffset})"
+            ),
+
+            FunctionCompletion(
+                "TweenInfo.new",
+                "TweenInfo.new(${1:time}, ${2:style}, ${3:direction})"
+            ),
+
+            FunctionCompletion(
+                "hookfunction",
+                "hookfunction(${1:function}, ${2:replacement})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "hookmetamethod",
+                "hookmetamethod(${1:object}, \"${2:__namecall}\", ${3:replacement})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getrawmetatable",
+                "getrawmetatable(${1:object})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "setreadonly",
+                "setreadonly(${1:table}, ${2:true})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "isreadonly",
+                "isreadonly(${1:table})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getgenv",
+                "getgenv()",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getrenv",
+                "getrenv()",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getgc",
+                "getgc(${1:true})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getreg",
+                "getreg()",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getconnections",
+                "getconnections(${1:signal})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "identifyexecutor",
+                "identifyexecutor()",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "isexecutorclosure",
+                "isexecutorclosure(${1:function})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "newcclosure",
+                "newcclosure(${1:function})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "checkcaller",
+                "checkcaller()",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "clonefunction",
+                "clonefunction(${1:function})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "cloneref",
+                "cloneref(${1:instance})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "compareinstances",
+                "compareinstances(${1:a}, ${2:b})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getnamecallmethod",
+                "getnamecallmethod()",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "setnamecallmethod",
+                "setnamecallmethod(\"${1:method}\")",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "gethui",
+                "gethui()",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "gethiddenproperty",
+                "gethiddenproperty(${1:instance}, \"${2:property}\")",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "sethiddenproperty",
+                "sethiddenproperty(${1:instance}, \"${2:property}\", ${3:value})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "setclipboard",
+                "setclipboard(\"${1:text}\")",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "toclipboard",
+                "toclipboard(\"${1:text}\")",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "queue_on_teleport",
+                "queue_on_teleport([[${1:code}]])",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "setthreadidentity",
+                "setthreadidentity(${1:identity})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getthreadidentity",
+                "getthreadidentity()",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "setidentity",
+                "setidentity(${1:identity})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getidentity",
+                "getidentity()",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "fireclickdetector",
+                "fireclickdetector(${1:detector})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "fireproximityprompt",
+                "fireproximityprompt(${1:prompt})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "firesignal",
+                "firesignal(${1:signal}, ${2:...})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "firetouchinterest",
+                "firetouchinterest(${1:part1}, ${2:part2}, ${3:touchType})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getscriptclosure",
+                "getscriptclosure(${1:script})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getscriptbytecode",
+                "getscriptbytecode(${1:script})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getscripthash",
+                "getscripthash(${1:script})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getsenv",
+                "getsenv(${1:script})",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getloadedmodules",
+                "getloadedmodules()",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getinstances",
+                "getinstances()",
+                "Executor API."
+            ),
+
+            FunctionCompletion(
+                "getnilinstances",
+                "getnilinstances()",
+                "Executor API."
+            )
+        ];
+
+        monaco.languages.registerCompletionItemProvider(
+            "luau",
+            {
+                triggerCharacters: [
+                    ".",
+                    ":"
+                ],
+
+                provideCompletionItems: function (
+                    model,
+                    position
+                ) {
+
+                    const word =
+                        model.getWordUntilPosition(position);
+
+                    const range = {
+                        startLineNumber:
+                            position.lineNumber,
+
+                        endLineNumber:
+                            position.lineNumber,
+
+                        startColumn:
+                            word.startColumn,
+
+                        endColumn:
+                            word.endColumn
+                    };
+
+                    return {
+                        suggestions:
+                            completions.map(function (item) {
+
+                                return {
+                                    ...item,
+                                    range: range
+                                };
+
+                            })
+                    };
+                }
+            }
+        );
+
+        monaco.editor.defineTheme(
+            "hype-dark",
+            {
+                base: "vs-dark",
+
+                inherit: true,
+
+                rules: [
+
+                    {
+                        token: "keyword",
+                        foreground: "C586C0"
+                    },
+
+                    {
+                        token: "type",
+                        foreground: "4EC9B0"
+                    },
+
+                    {
+                        token: "string",
+                        foreground: "CE9178"
+                    },
+
+                    {
+                        token: "number",
+                        foreground: "B5CEA8"
+                    },
+
+                    {
+                        token: "comment",
+                        foreground: "6A9955"
+                    },
+
+                    {
+                        token: "operator",
+                        foreground: "D4D4D4"
+                    },
+
+                    {
+                        token: "identifier",
+                        foreground: "DCDCAA"
+                    }
+                ],
+
+                colors: {
+
+                    "editor.background":
+                        "#100817",
+
+                    "editor.foreground":
+                        "#EDE3F2",
+
+                    "editorLineNumber.foreground":
+                        "#624D6D",
+
+                    "editorLineNumber.activeForeground":
+                        "#B98ED0",
+
+                    "editorCursor.foreground":
+                        "#FFFFFF",
+
+                    "editor.selectionBackground":
+                        "#5D1F8666",
+
+                    "editor.inactiveSelectionBackground":
+                        "#40105E55",
+
+                    "editor.lineHighlightBackground":
+                        "#1B0D25",
+
+                    "editorGutter.background":
+                        "#100817",
+
+                    "editorSuggestWidget.background":
+                        "#1B0D25",
+
+                    "editorSuggestWidget.border":
+                        "#4C285F",
+
+                    "editorSuggestWidget.foreground":
+                        "#EDE3F2",
+
+                    "editorSuggestWidget.selectedBackground":
+                        "#5D1F86",
+
+                    "editorSuggestWidget.highlightForeground":
+                        "#FFFFFF",
+
+                    "editorWidget.background":
+                        "#1B0D25",
+
+                    "editorWidget.border":
+                        "#4C285F",
+
+                    "minimap.background":
+                        "#0D0612",
+
+                    "minimapSlider.background":
+                        "#7540A088",
+
+                    "minimapSlider.hoverBackground":
+                        "#9252C5AA",
+
+                    "minimapSlider.activeBackground":
+                        "#A765D0AA"
+                }
+            }
+        );
+
+        const editor =
+            monaco.editor.create(
+                document.getElementById("editor"),
+                {
+
+                    value: [
+                        "print(\"Hype Ontop\")"
+                    ].join("\n"),
+
+                    language: "luau",
+
+                    theme: "hype-dark",
+
+                    automaticLayout: true,
+
+                    fontFamily:
+                        "Cascadia Code, Cascadia Mono, Consolas, monospace",
+
+                    fontSize: 14,
+
+                    lineHeight: 22,
+
+                    minimap: {
+                        enabled: true,
+                        side: "right",
+                        showSlider: "mouseover",
+                        renderCharacters: true,
+                        maxColumn: 120
+                    },
+
+                    wordWrap: "off",
+
+                    smoothScrolling: true,
+
+                    cursorSmoothCaretAnimation: "on",
+
+                    cursorBlinking: "smooth",
+
+                    renderWhitespace: "selection",
+
+                    padding: {
+                        top: 14,
+                        bottom: 14
+                    },
+
+                    tabSize: 4,
+
+                    insertSpaces: true,
+
+                    automaticClosingBrackets: "always",
+
+                    autoClosingQuotes: "always",
+
+                    quickSuggestions: {
+                        other: true,
+                        comments: false,
+                        strings: false
+                    },
+
+                    acceptSuggestionOnEnter: "on",
+
+                    acceptSuggestionOnCommitCharacter:
+                        true,
+
+                    tabCompletion: "on",
+
+                    snippetSuggestions: "inline",
+
+                    parameterHints: {
+                        enabled: true
+                    },
+
+                    wordBasedSuggestions: "all",
+
+                    bracketPairColorization: {
+                        enabled: true
+                    },
+
+                    guides: {
+                        bracketPairs: true,
+                        indentation: true
+                    },
+
+                    scrollbar: {
+                        verticalScrollbarSize: 10,
+                        horizontalScrollbarSize: 10
+                    },
+
+                    suggest: {
+                        showMethods: true,
+                        showFunctions: true,
+                        showConstructors: true,
+                        showFields: true,
+                        showVariables: true,
+                        showClasses: true,
+                        showStructs: true,
+                        showInterfaces: true,
+                        showModules: true,
+                        showProperties: true,
+                        showKeywords: true,
+                        showValues: true,
+                        showConstants: true,
+                        showEnums: true,
+                        showEnumMembers: true,
+                        showOperators: true,
+                        showUnits: true,
+                        preview: true,
+                        showStatusBar: true
+                    }
+                }
+            );
+
+        window.hypeEditor = editor;
+
+        let autoClosingBlock = false;
+
+        editor.onDidChangeModelContent(
+            function (event) {
+
+                if (autoClosingBlock)
+                    return;
+
+                for (const change of event.changes) {
+
+                    if (!change.text.includes("\n"))
+                        continue;
+
+                    const position =
+                        editor.getPosition();
+
+                    if (!position)
+                        continue;
+
+                    const model =
+                        editor.getModel();
+
+                    if (!model)
+                        continue;
+
+                    const previousLineNumber =
+                        position.lineNumber - 1;
+
+                    if (previousLineNumber < 1)
+                        continue;
+
+                    const previousLine =
+                        model
+                            .getLineContent(
+                                previousLineNumber
+                            )
+                            .trim();
+
+                    const blockPattern =
+                        /^(for\b.*\bdo|if\b.*\bthen|elseif\b.*\bthen|while\b.*\bdo|function\b.*|local\s+function\b.*|do)$/;
+
+                    if (!blockPattern.test(previousLine))
+                        continue;
+
+                    const currentLine =
+                        model.getLineContent(
+                            position.lineNumber
+                        );
+
+                    if (currentLine.trim() !== "")
+                        continue;
+
+                    const indentationMatch =
+                        model
+                            .getLineContent(
+                                previousLineNumber
+                            )
+                            .match(/^\s*/);
+
+                    const indentation =
+                        indentationMatch
+                            ? indentationMatch[0]
+                            : "";
+
+                    const innerIndent =
+                        indentation + "    ";
+
+                    autoClosingBlock = true;
+
+                    editor.executeEdits(
+                        "hype-auto-end",
+                        [
+                            {
+                                range: {
+                                    startLineNumber:
+                                        position.lineNumber,
+
+                                    startColumn: 1,
+
+                                    endLineNumber:
+                                        position.lineNumber,
+
+                                    endColumn: 1
+                                },
+
+                                text:
+                                    innerIndent +
+                                    "\n" +
+                                    indentation +
+                                    "end"
+                            }
+                        ]
+                    );
+
+                    editor.setPosition(
+                        {
+                            lineNumber:
+                                position.lineNumber,
+
+                            column:
+                                innerIndent.length + 1
+                        }
+                    );
+
+                    autoClosingBlock = false;
+
+                    break;
+                }
+            }
+        );
+
+        window.getCode = function () {
+            return editor.getValue();
+        };
+
+        window.setCode = function (code) {
+            editor.setValue(code || "");
+        };
+
+        window.clearCode = function () {
+            editor.setValue("");
+        };
+
+        window.focusEditor = function () {
+            editor.focus();
+        };
+
+        window.insertText = function (text) {
+
+            const selection =
+                editor.getSelection();
+
+            if (!selection)
+                return;
+
+            editor.executeEdits(
+                "hype-insert",
+                [
+                    {
+                        range: selection,
+                        text: text,
+                        forceMoveMarkers: true
+                    }
+                ]
+            );
+
+            editor.focus();
+        };
+
+        window.toggleMinimap = function () {
+
+            const options =
+                editor.getOption(
+                    monaco.editor.EditorOption.minimap
+                );
+
+            const enabled =
+                !options.enabled;
+
+            editor.updateOptions({
+                minimap: {
+                    enabled: enabled
+                }
+            });
+
+            return enabled;
+        };
+
+        window.setMinimap = function (enabled) {
+
+            const value =
+                Boolean(enabled);
+
+            editor.updateOptions({
+                minimap: {
+                    enabled: value
+                }
+            });
+
+            return value;
+        };
+
+        window.isMinimapEnabled = function () {
+
+            return editor
+                .getOption(
+                    monaco.editor.EditorOption.minimap
+                )
+                .enabled;
+        };
+
+        window.getEditorValue = function () {
+            return editor.getValue();
+        };
+
+        window.setEditorValue = function (value) {
+            editor.setValue(value || "");
+        };
+
+        window.layoutEditor = function () {
+            editor.layout();
+        };
+
+        window.addEventListener(
+            "resize",
+            function () {
+                editor.layout();
+            }
+        );
+
+    });
+
+</script>
+
+</body>
+</html>
