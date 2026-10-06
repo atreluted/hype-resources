@@ -1089,116 +1089,136 @@
                 }
             }
         );
+monaco.editor.defineTheme(
+    "hype-dark",
+    {
+        base: "vs-dark",
 
-        monaco.editor.defineTheme(
-            "hype-dark",
+        inherit: true,
+
+        rules: [
+
             {
-                base: "vs-dark",
+                token: "keyword",
+                foreground: "C678DD"
+            },
 
-                inherit: true,
+            {
+                token: "type",
+                foreground: "56B6C2"
+            },
 
-                rules: [
+            {
+                token: "string",
+                foreground: "98C379"
+            },
 
-                    {
-                        token: "keyword",
-                        foreground: "C586C0"
-                    },
+            {
+                token: "number",
+                foreground: "D19A66"
+            },
 
-                    {
-                        token: "type",
-                        foreground: "4EC9B0"
-                    },
+            {
+                token: "comment",
+                foreground: "6B6570"
+            },
 
-                    {
-                        token: "string",
-                        foreground: "CE9178"
-                    },
+            {
+                token: "operator",
+                foreground: "C7C7CC"
+            },
 
-                    {
-                        token: "number",
-                        foreground: "B5CEA8"
-                    },
-
-                    {
-                        token: "comment",
-                        foreground: "6A9955"
-                    },
-
-                    {
-                        token: "operator",
-                        foreground: "D4D4D4"
-                    },
-
-                    {
-                        token: "identifier",
-                        foreground: "DCDCAA"
-                    }
-                ],
-
-                colors: {
-
-                    "editor.background":
-                        "#202227",
-
-                    "editor.foreground":
-                        "#EDE3F2",
-
-                    "editorLineNumber.foreground":
-                        "#624D6D",
-
-                    "editorLineNumber.activeForeground":
-                        "#353741",
-
-                    "editorCursor.foreground":
-                        "#FFFFFF",
-
-                    "editor.selectionBackground":
-                        "#5D1F8666",
-
-                    "editor.inactiveSelectionBackground":
-                        "#40105E55",
-
-                    "editor.lineHighlightBackground":
-                        "#1B0D25",
-
-                    "editorGutter.background":
-                        "#100817",
-
-                    "editorSuggestWidget.background":
-                        "#1B0D25",
-
-                    "editorSuggestWidget.border":
-                        "#4C285F",
-
-                    "editorSuggestWidget.foreground":
-                        "#EDE3F2",
-
-                    "editorSuggestWidget.selectedBackground":
-                        "#5D1F86",
-
-                    "editorSuggestWidget.highlightForeground":
-                        "#FFFFFF",
-
-                    "editorWidget.background":
-                        "#1B0D25",
-
-                    "editorWidget.border":
-                        "#4C285F",
-
-                    "minimap.background":
-                        "#0D0612",
-
-                    "minimapSlider.background":
-                        "#7540A088",
-
-                    "minimapSlider.hoverBackground":
-                        "#9252C5AA",
-
-                    "minimapSlider.activeBackground":
-                        "#A765D0AA"
-                }
+            {
+                token: "identifier",
+                foreground: "DCDCE2"
             }
-        );
+        ],
+
+        colors: {
+
+            "editor.background":
+                "#121215",
+
+            "editor.foreground":
+                "#E5E5EA",
+
+            "editorLineNumber.foreground":
+                "#505058",
+
+            "editorLineNumber.activeForeground":
+                "#9A9AA3",
+
+            "editorCursor.foreground":
+                "#B96CE8",
+
+            "editor.selectionBackground":
+                "#5D1F8666",
+
+            "editor.inactiveSelectionBackground":
+                "#40105E55",
+
+            "editor.lineHighlightBackground":
+                "#18181D",
+
+            "editorGutter.background":
+                "#121215",
+
+            "editorSuggestWidget.background":
+                "#19191E",
+
+            "editorSuggestWidget.border":
+                "#303038",
+
+            "editorSuggestWidget.foreground":
+                "#E5E5EA",
+
+            "editorSuggestWidget.selectedBackground":
+                "#40105E",
+
+            "editorSuggestWidget.highlightForeground":
+                "#C77BEF",
+
+            "editorWidget.background":
+                "#19191E",
+
+            "editorWidget.border":
+                "#303038",
+
+            "minimap.background":
+                "#101014",
+
+            "minimapSlider.background":
+                "#5D1F8666",
+
+            "minimapSlider.hoverBackground":
+                "#7A35A899",
+
+            "minimapSlider.activeBackground":
+                "#9B4DCAAA",
+
+            "scrollbarSlider.background":
+                "#35353D88",
+
+            "scrollbarSlider.hoverBackground":
+                "#4A4A5588",
+
+            "scrollbarSlider.activeBackground":
+                "#5D5D6A99",
+
+            "editorIndentGuide.background":
+                "#24242A",
+
+            "editorIndentGuide.activeBackground":
+                "#3A3A43",
+
+            "editorBracketMatch.background":
+                "#40105E",
+
+            "editorBracketMatch.border":
+                "#8B42B5"
+        }
+    }
+);
 
         const editor =
             monaco.editor.create(
@@ -1206,7 +1226,7 @@
                 {
 
                     value: [
-                        "print(\"Hype Ontop\")"
+                        "print(\"discord.gg/gethype\")"
                     ].join("\n"),
 
                     language: "luau",
@@ -1222,13 +1242,13 @@
 
                     lineHeight: 22,
 
-                    minimap: {
-                        enabled: true,
-                        side: "right",
-                        showSlider: "mouseover",
-                        renderCharacters: true,
-                        maxColumn: 120
-                    },
+minimap: {
+    enabled: true,
+    side: "right",
+    showSlider: "mouseover",
+    renderCharacters: true,
+    maxColumn: 120
+},
 
                     wordWrap: "off",
 
